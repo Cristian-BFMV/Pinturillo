@@ -1,0 +1,18 @@
+{
+  "name": "pinturillo",
+  "version": "1.0.0",
+  "description": "Game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "videogaem"
+  ],
+  "author": "Cristian Mendoza Mateo Baena",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
+  }
+}
