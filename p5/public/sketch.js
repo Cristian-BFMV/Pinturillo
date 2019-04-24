@@ -4,7 +4,7 @@ function setup() {
   createCanvas(600,600);
   background(0);  
   socket = io();
-  socket.on('mouse', newDrawing);
+  socket.on('mouse', newDrawing);  
 }
 
 function newDrawing(data){
@@ -12,7 +12,7 @@ function newDrawing(data){
   ellipse(data.x, data.y, 10,10);
 }
 
-function draw() {    
+function draw() {     
 }
 
 function mouseDragged(){
@@ -24,6 +24,9 @@ function mouseDragged(){
   }
   socket.emit('mouse', data);
 }
+
+
+
 
 
 
