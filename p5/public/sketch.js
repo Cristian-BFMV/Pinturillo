@@ -1,4 +1,8 @@
 var socket;
+/*
+let sketch = p.setup();
+
+new p5(sketch, document.getElementById('canvas-container'));*/
 
 function setup() {
   createCanvas(600,600);
@@ -24,6 +28,8 @@ function mouseDragged(){
   }
   socket.emit('mouse', data);
 }
+
+
 
 
 
