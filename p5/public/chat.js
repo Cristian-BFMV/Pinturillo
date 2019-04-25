@@ -1,5 +1,5 @@
 
-class Cliente{
+/*class Cliente{
   constructor(){
       this.socket = io();
   }
@@ -9,6 +9,8 @@ class Cliente{
   }
 }
 
+//import Cliente from './Cliente.js';
+*/
 var cliente = new Cliente();
 /** Elementos del DOM **/
 let message = document.getElementById('message');
@@ -28,7 +30,12 @@ let actions = document.getElementById('actions');
  *  este caso lo enviamos como un objeto donde obtenemos el valor que tengan las
  *  etiquetas "input" (username y message) de nuestro HTML**/
 btn.addEventListener('click', function(){
-    cliente.ChatMessage({username:username.value, message: message.value});
+    console.log('I am working');
+    var data = {
+        username:username.value,
+        message: message.value
+    }
+    cliente.ChatMessage(data);
 });
 /** Evento de usuario escribiendo mensaje
  *  
