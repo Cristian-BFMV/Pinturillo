@@ -7,8 +7,9 @@ let output = document.getElementById('output');
 let actions = document.getElementById('actions');
 
 function setup() {
-  createCanvas(600,600);
-  background(0);  
+  var myCanvas = createCanvas(400,400);    
+  background(0);    
+  myCanvas.parent();
   socket.on('mouse', newDrawing);  
 }
 
@@ -29,6 +30,7 @@ function mouseDragged(){
   }
   socket.emit('mouse', data);
   
+  
 }
 function keyPressed(){
   if(keyCode === ENTER){
@@ -48,13 +50,13 @@ function keyPressed(){
  *  informacion sera el usuario que envia el mensaje y el contenido de este. En 
  *  este caso lo enviamos como un objeto donde obtenemos el valor que tengan las
  *  etiquetas "input" (username y message) de nuestro HTML**/
-btn.addEventListener('click', function(){
-  
+btn.addEventListener('click', function(){  
   var data = {
       username:username.value,
       message: message.value
   }
   socket.emit('chat message' ,data);  
+  
 });
 
 socket.on('chat message', function(data){
