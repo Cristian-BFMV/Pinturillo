@@ -8,10 +8,10 @@
     }
 }*/
 
-function Cliente(){
-    this.socket = io();
-    this.ChatMessage = function(data){
-        this.socket.emit('Chat Message', data);
-    }
+var socket = io();
+
+function ChatMessage(data){
+    this.socket.emit('Chat Message', data);
 }
 
+exports.ChatMessage = ChatMessage;

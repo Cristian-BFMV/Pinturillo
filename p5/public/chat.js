@@ -11,7 +11,7 @@
 
 //import Cliente from './Cliente.js';
 */
-var cliente = new Cliente();
+const cliente =require('./Cliente.js');
 /** Elementos del DOM **/
 let message = document.getElementById('message');
 let username = document.getElementById('username');
@@ -35,7 +35,7 @@ btn.addEventListener('click', function(){
         username:username.value,
         message: message.value
     }
-    cliente.ChatMessage(data);
+    
 });
 /** Evento de usuario escribiendo mensaje
  *  
