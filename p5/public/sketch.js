@@ -7,30 +7,32 @@ let output = document.getElementById('output');
 let actions = document.getElementById('actions');
 
 function setup() {
-  var myCanvas = createCanvas(400,400);    
-  background(0);    
-  myCanvas.parent();
+  var myCanvas = createCanvas(980,400);    
+  background(255);    
+  
+  myCanvas.parent('chat-container');
   socket.on('mouse', newDrawing);  
 }
 
 function newDrawing(data){
-  noStroke();    
-  ellipse(data.x, data.y, 10,10);
+  strokeWeight(4);
+  line(data.newX, data.newY, data.previousX, data.previousY);    
 }
 
-function draw() {     
+function draw() {         
 }
 
-function mouseDragged(){
-  noStroke();    
-  ellipse(mouseX, mouseY, 10,10);
+function mouseDragged(){    
+  strokeWeight(4);
+  line(mouseX, mouseY, pmouseX, pmouseY);    
   var data = {
-      x: mouseX,
-      y: mouseY
+      previousX: pmouseX,
+      previousY: pmouseY,
+      newX: mouseX,
+      newY: mouseY
+
   }
-  socket.emit('mouse', data);
-  
-  
+  socket.emit('mouse', data);  
 }
 function keyPressed(){
   if(keyCode === ENTER){
