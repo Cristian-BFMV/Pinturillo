@@ -28,7 +28,13 @@ io.on('connection', (socket)=>{
          *  **/
         console.log('Datos recibidos' , data);
         io.sockets.emit('chat message',data);
+    
     })
+    socket.on('clear board', (data)=>{
+        console.log(data);
+        var respuesta = 'board cleared';
+        socket.broadcast.emit('clear board', respuesta);
+    });
 });
 
 
