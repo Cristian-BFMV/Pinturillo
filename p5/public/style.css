@@ -41,7 +41,7 @@ body {
     color: #555;
     width: 100%;
     
-    background-color:rgba(153, 179, 174, 0.781);
+    background-color:rgb(255, 255, 255);
 	background-image: radial-gradient(#fff 10%, transparent 10%),
 	radial-gradient(#fff 10%, transparent 10%);
 	background-size: 30px 30px;

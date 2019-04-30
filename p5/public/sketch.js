@@ -1,5 +1,5 @@
 var socket = io();
-var jugadorDibujo = 'Cristian';
+var jugadorDibujo;
 var myCanvas;
 /** Elementos del DOM **/
 let message = document.getElementById('message');
@@ -26,8 +26,8 @@ function draw() {
 }
 
 function mouseDragged(){
-  console.log(jugadorDibujo);    
-  if(jugadorDibujo == 'Cristian'){
+  console.log(jugadorDibujo , 'Hola wey');    
+  if(jugadorDibujo == username.value){
     strokeWeight(4);
     line(mouseX, mouseY, pmouseX, pmouseY);    
     var data = {
@@ -37,7 +37,7 @@ function mouseDragged(){
         newY: mouseY
     }
     socket.emit('mouse', data);  
-  }  
+  }
 }
 function keyPressed(){
   if(keyCode === ENTER){
@@ -60,14 +60,14 @@ function keyPressed(){
 btn.addEventListener('click', function(){  
   var data = {
       username:username.value,
-      message: message.value
+      message: message.value,
+      id: socket.id
   }
   socket.emit('chat message' ,data);  
   
 });
 
-socket.on('chat message', function(data){
-  console.log(data);
+socket.on('chat message', function(data){  
   actions.innerHTML = '';
   output.innerHTML += `<p>
       <strong>${data.username}</strong>: ${data.message}
@@ -76,11 +76,19 @@ socket.on('chat message', function(data){
 
 socket.on('mouse', newDrawing);  
 
-jugar.addEventListener('click' , ()=>{
-  clear();
+/*  clear();
   setup();
   var data ='clear the board';
-  socket.emit('clear board', data);
+  socket.emit('clear board', data);*/
+
+
+jugar.addEventListener('click' , ()=>{
+    socket.emit('start the game');
+});
+
+socket.on('start the game' , (player)=>{
+  jugadorDibujo=player.username;
+  console.log(jugadorDibujo);
 });
 
 socket.on('clear board', (data)=>{
