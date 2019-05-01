@@ -1,6 +1,9 @@
+//Declaración de variables
 var socket = io();
 var jugadorDibujo;
+var palabraEscogida;
 var myCanvas;
+var acierto = false;
 /** Elementos del DOM **/
 let message = document.getElementById('message');
 let username = document.getElementById('username');
@@ -26,8 +29,8 @@ function draw() {
 }
 
 function mouseDragged(){
-  console.log(jugadorDibujo , 'Hola wey');    
-  if(jugadorDibujo == username.value){
+  //Controla que el jugador tenga el permiso para dibujar
+  if(jugadorDibujo.username == username.value && jugadorDibujo.id == socket.id){
     strokeWeight(4);
     line(mouseX, mouseY, pmouseX, pmouseY);    
     var data = {
@@ -39,12 +42,24 @@ function mouseDragged(){
     socket.emit('mouse', data);  
   }
 }
+//Permite que el usuario envie el mensaje al oprimir la tecla enter
 function keyPressed(){
   if(keyCode === ENTER){
+    var mensaje;
+    if(palabraEscogida != undefined){
+      if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
+          mensaje = username.value + ', ha acertado la palabra';        
+      }else{
+        mensaje = message.value;      
+      } 
+    }else{
+      mensaje = message.value;
+    }
     var data = {
-      username: username.value,
-      message: message.value
-    };
+        username:username.value,
+        message: mensaje,
+        id: socket.id
+    }
     socket.emit('chat message' ,data);  
   }
 }
@@ -57,14 +72,30 @@ function keyPressed(){
  *  informacion sera el usuario que envia el mensaje y el contenido de este. En 
  *  este caso lo enviamos como un objeto donde obtenemos el valor que tengan las
  *  etiquetas "input" (username y message) de nuestro HTML**/
-btn.addEventListener('click', function(){  
+btn.addEventListener('click', function(){    
+  var mensaje;
+  var flag = false;
+  
+  if(palabraEscogida != undefined){
+    //Controla cuando el jugador ha acertado la palabra
+    if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){        
+        //Si el jugador acierta la palabra, esta no se le muestra a los demás jugadores
+        mensaje = username.value + ', ha acertado la palabra'; 
+        //Cuando el jugador acierta la palabra, se le lleva esta información al servidor por medio de esta variable.
+        flag = true;       
+    }else{
+      mensaje = message.value;      
+    } 
+  }else{
+    mensaje = message.value;
+  }  
   var data = {
       username:username.value,
-      message: message.value,
-      id: socket.id
+      message: mensaje,
+      id: socket.id,
+      isAcierto: flag
   }
-  socket.emit('chat message' ,data);  
-  
+  socket.emit('chat message' ,data);    
 });
 
 socket.on('chat message', function(data){  
@@ -73,7 +104,7 @@ socket.on('chat message', function(data){
       <strong>${data.username}</strong>: ${data.message}
   </p>`
 });
-
+//Evento que dibuja en el browser de los demás jugadores, se llama a la función newDrawing
 socket.on('mouse', newDrawing);  
 
 /*  clear();
@@ -81,16 +112,17 @@ socket.on('mouse', newDrawing);
   var data ='clear the board';
   socket.emit('clear board', data);*/
 
-
+//Por el momento la funcionalidad de escoger el jugador para que se le premita dibujar a traves del evento del boton
 jugar.addEventListener('click' , ()=>{
     socket.emit('start the game');
 });
-
-socket.on('start the game' , (player)=>{
-  jugadorDibujo=player.username;
-  console.log(jugadorDibujo);
+//Evento que recibe el jugador que tiene el permiso de dibujar por parte del servidor
+socket.on('start the game' , (gameState)=>{
+  jugadorDibujo = gameState.jugador;
+  palabraEscogida = gameState.palabra;  
 });
 
+//Evento(no implementado) que sirve para limpiar el tablero.
 socket.on('clear board', (data)=>{
   console.log(data)
   clear();

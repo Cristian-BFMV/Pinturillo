@@ -6,6 +6,9 @@ var http = require('http').createServer(app);
 var socket = require('socket.io');
 var io = socket(http);
 var players = [];
+var palabras = ["Balon" , "Carro" , "Puerta"];
+var puntos = 100;
+var porcentaje = 1;
 
 
 app.use(express.static(path.join(__dirname,'public')));
@@ -30,29 +33,50 @@ io.on('connection', (socket)=>{
          *  un hipotetico host.
          *  **/
         
+         /* Alamacena la informacion de un cliente cuando este envia un mensaje por primera vez*/ 
         if(!flag){
             var playerData = {
                 username: data.username,
-                id: data.id                
+                id: data.id,    
+                puntaje: 0            
             }
             players.push(playerData);
             flag = true;            
+        }
+        //En caso de que el jugador haya acertado , se le aumenta el puntaje
+        if(data.isAcierto){
+            for(var i = 0 ; i < players.length ; i++){
+                if(players[i].id = data.id){
+                    players[i].puntaje += puntos*porcentaje;
+                    porcentaje -= 0.25;
+                    console.log(players[i]);
+                    break;
+                }
+            }
         }        
         io.sockets.emit('chat message',data);
     });
-
+    /* Evento para limpliar el tablero, usarlo cuando sea necesario implementar la funcionalidad*/
     socket.on('clear board', (data)=>{
         console.log(data);
         var respuesta = 'board cleared';
         socket.broadcast.emit('clear board', respuesta);
     });
-    
+    /* Evento que escoge uno de los jugadores guardados en el array players para que sea él el unico que tenga el permiso de dibujar*/
     socket.on('start the game',  ()=>{
-        var choosenPlayer = Math.floor(Math.random()*players.length);
-        var playerDraw = players[choosenPlayer];
-        console.log(playerDraw.username);
-        io.sockets.emit('start the game', playerDraw);
+        var jugadorEscogido = Math.floor(Math.random()*players.length);
+        var palabraEscogida = Math.floor(Math.random()*palabras.length);
+        var gameState ={
+            jugador: players[jugadorEscogido],
+            palabra: palabras[palabraEscogida]
+        };     
+        console.log(gameState);
+        io.sockets.emit('start the game', gameState);
     });    
+
+    socket.on('nose' , (data)=>{
+        console.log(data);        
+    });
 });
 
 
