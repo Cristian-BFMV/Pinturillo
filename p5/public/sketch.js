@@ -46,9 +46,11 @@ function mouseDragged(){
 function keyPressed(){
   if(keyCode === ENTER){
     var mensaje;
+    var flag = false;
     if(palabraEscogida != undefined){
       if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
-          mensaje = username.value + ', ha acertado la palabra';        
+          mensaje = username.value + ', ha acertado la palabra';   
+          flag = true;     
       }else{
         mensaje = message.value;      
       } 
@@ -58,7 +60,8 @@ function keyPressed(){
     var data = {
         username:username.value,
         message: mensaje,
-        id: socket.id
+        id: socket.id,
+        isAcierto: flag
     }
     socket.emit('chat message' ,data);  
   }
