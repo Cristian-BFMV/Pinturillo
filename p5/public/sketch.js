@@ -111,11 +111,34 @@ btn.addEventListener('click', function(){
     }      
 });
 
+sala1.addEventListener('click',function(){
+  socket.emit('change channel','sala1');
+  clear();
+  setup();
+});
+  
+
+
+sala2.addEventListener('click',function(){
+  socket.emit('change channel', 'sala2');
+  clear();
+  setup();
+});
+
 socket.on('chat message', function(data){  
   actions.innerHTML = '';
   output.innerHTML += `<p>
       <strong>${data.username}</strong>: ${data.message}
   </p>`
+});
+
+socket.on('change channel', function(sala){  
+  actions.innerHTML = '';
+  output.innerHTML += `<p>
+      Bienvenido a la sala: <strong>${sala}</strong>
+  </p>`
+ // clear();
+  //setup();
 });
 //Evento que dibuja en el browser de los demás jugadores, se llama a la función newDrawing
 socket.on('mouse', newDrawing);  
