@@ -10,6 +10,8 @@ let username = document.getElementById('username');
 let btn = document.getElementById('send');
 let output = document.getElementById('output');
 let actions = document.getElementById('actions');
+let sala1 = document.getElementById('sala1');
+let sala2 = document.getElementById('sala2');
 let jugar = document.getElementById('jugar');
 
 
@@ -101,12 +103,39 @@ btn.addEventListener('click', function(){
   socket.emit('chat message' ,data);    
 });
 
+sala1.addEventListener('click',function(){
+  socket.emit('change channel','sala1');
+  clear();
+  setup();
+});
+  
+
+
+sala2.addEventListener('click',function(){
+  socket.emit('change channel', 'sala2');
+  clear();
+  setup();
+});
+
 socket.on('chat message', function(data){  
   actions.innerHTML = '';
   output.innerHTML += `<p>
       <strong>${data.username}</strong>: ${data.message}
   </p>`
+  //clear();
+  //setup();
 });
+
+socket.on('change channel', function(sala){  
+  actions.innerHTML = '';
+  output.innerHTML += `<p>
+      Bienvenido a la sala: <strong>${sala}</strong>
+  </p>`
+ // clear();
+  //setup();
+});
+
+
 //Evento que dibuja en el browser de los demás jugadores, se llama a la función newDrawing
 socket.on('mouse', newDrawing);  
 
@@ -116,7 +145,7 @@ socket.on('mouse', newDrawing);
   socket.emit('clear board', data);*/
 
 //Por el momento la funcionalidad de escoger el jugador para que se le premita dibujar a traves del evento del boton
-jugar.addEventListener('click' , ()=>{
+jugar.addEventListener('click' ,()=>{
     socket.emit('start the game');
 });
 //Evento que recibe el jugador que tiene el permiso de dibujar por parte del servidor

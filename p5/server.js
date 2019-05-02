@@ -19,9 +19,14 @@ http.listen(3000, ()=>{
 /** Evento de conexion de usuario al servidor **/
 io.on('connection', (socket)=>{
     var flag = false;
+    var sala = 'sala1'; //Variable para identificar sala donde se encuentra un socket
+
+    //Unimos el socket a la sala por defecto
+    socket.join(sala);
     console.log('An user connected ' + socket.id);
     socket.on('mouse', (data)=>{
-        socket.broadcast.emit('mouse', data);
+        //socket.broadcast.emit('mouse', data);
+        socket.broadcast.in(sala).emit('mouse', data);
     });
 
     /** Evento de recibir mensjaes que son enviados del chat **/
@@ -54,13 +59,17 @@ io.on('connection', (socket)=>{
                 }
             }
         }        
-        io.sockets.emit('chat message',data);
+        /** El evento es emitido a todos los usuarios/sockets de la sala, incluso a su
+         *  emisor **/
+        io.sockets.in(sala).emit('chat message',data);
     });
     /* Evento para limpliar el tablero, usarlo cuando sea necesario implementar la funcionalidad*/
     socket.on('clear board', (data)=>{
         console.log(data);
         var respuesta = 'board cleared';
-        socket.broadcast.emit('clear board', respuesta);
+        /** El evento es mostrado a todos los usuarios/sockets de la sala menos al emisor **/
+        //socket.broadcast.emit('clear board', respuesta);
+        socket.broadcast.in(sala).emit('clear board', respuesta);
     });
     /* Evento que escoge uno de los jugadores guardados en el array players para que sea él el unico que tenga el permiso de dibujar*/
     socket.on('start the game',  ()=>{
@@ -71,12 +80,24 @@ io.on('connection', (socket)=>{
             palabra: palabras[palabraEscogida]
         };     
         console.log(gameState);
-        io.sockets.emit('start the game', gameState);
+
+        //io.sockets.emit('start the game', gameState);
+        io.sockets.in(sala).emit('start the game', gameState);
     });    
 
     socket.on('nose' , (data)=>{
         console.log(data);        
     });
+    /** Evento de cambio de canal **/
+    socket.on('change channel', (nuevaSala)=> {
+        socket.join(nuevaSala); //Se une el socket al nuevo canal
+        socket.leave(sala); //Se saca el socket de su anterior canal
+        console.log('El usuario ',socket.id,' se ha cambiado del canal ',sala,' a ',nuevaSala );
+        sala = nuevaSala; //Se indica el canal en el que se encuentra el socket
+        socket.emit('change channel',nuevaSala); //Se envia el evento de cambio de canal
+    });
+
+
 });
 
 
