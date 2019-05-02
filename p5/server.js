@@ -40,20 +40,11 @@ io.on('connection', (socket)=>{
                 id: data.id,    
                 puntaje: 0            
             }
+            console.log(playerData);
             players.push(playerData);
             flag = true;            
         }
-        //En caso de que el jugador haya acertado , se le aumenta el puntaje
-        if(data.isAcierto){
-            for(var i = 0 ; i < players.length ; i++){
-                if(players[i].id = data.id){
-                    players[i].puntaje += puntos*porcentaje;
-                    porcentaje -= 0.25;
-                    console.log(players[i]);
-                    break;
-                }
-            }
-        }        
+        //En caso de que el jugador haya acertado , se le aumenta el puntaje                
         io.sockets.emit('chat message',data);
     });
     /* Evento para limpliar el tablero, usarlo cuando sea necesario implementar la funcionalidad*/
@@ -61,6 +52,20 @@ io.on('connection', (socket)=>{
         console.log(data);
         var respuesta = 'board cleared';
         socket.broadcast.emit('clear board', respuesta);
+    });
+
+    socket.on('acierto' , (data)=>{
+        for(var i = 0 ; i < players.length ; i++){
+            if(players[i].id == data.id && players[i].username == data.username){
+                players[i].puntaje += puntos*porcentaje;
+                if(porcentaje > 0){
+                    porcentaje -= 0.25;
+                }
+                console.log(players[i]);
+                break;
+            }
+        }
+        io.sockets.emit('chat message',data);
     });
     /* Evento que escoge uno de los jugadores guardados en el array players para que sea él el unico que tenga el permiso de dibujar*/
     socket.on('start the game',  ()=>{
