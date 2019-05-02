@@ -30,40 +30,45 @@ function draw() {
 
 function mouseDragged(){
   //Controla que el jugador tenga el permiso para dibujar
-  if(jugadorDibujo.username == username.value && jugadorDibujo.id == socket.id){
-    strokeWeight(4);
-    line(mouseX, mouseY, pmouseX, pmouseY);    
-    var data = {
-        previousX: pmouseX,
-        previousY: pmouseY,
-        newX: mouseX,
-        newY: mouseY
+  if(jugadorDibujo != undefined){
+    if(jugadorDibujo.username == username.value && jugadorDibujo.id == socket.id){
+      strokeWeight(4);
+      line(mouseX, mouseY, pmouseX, pmouseY);    
+      var data = {
+          previousX: pmouseX,
+          previousY: pmouseY,
+          newX: mouseX,
+          newY: mouseY
+      }
+      socket.emit('mouse', data);  
     }
-    socket.emit('mouse', data);  
   }
 }
 //Permite que el usuario envie el mensaje al oprimir la tecla enter
 function keyPressed(){
   if(keyCode === ENTER){
-    var mensaje;
-    var flag = false;
+    var mensaje;    
     if(palabraEscogida != undefined){
       if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
-          mensaje = username.value + ', ha acertado la palabra';   
-          flag = true;     
+          mensaje = username.value + ', ha acertado la palabra';             
+          var data = {
+            username:username.value,
+            message: mensaje,
+            id: socket.id,        
+        }
+        socket.emit('acierto',data);
       }else{
         mensaje = message.value;      
       } 
     }else{
       mensaje = message.value;
-    }
-    var data = {
+      var data = {
         username:username.value,
         message: mensaje,
-        id: socket.id,
-        isAcierto: flag
-    }
-    socket.emit('chat message' ,data);  
+        id: socket.id,        
+      }
+      socket.emit('chat message' ,data);  
+    }    
   }
 }
 
@@ -76,29 +81,34 @@ function keyPressed(){
  *  este caso lo enviamos como un objeto donde obtenemos el valor que tengan las
  *  etiquetas "input" (username y message) de nuestro HTML**/
 btn.addEventListener('click', function(){    
-  var mensaje;
-  var flag = false;
-  
-  if(palabraEscogida != undefined){
-    //Controla cuando el jugador ha acertado la palabra
-    if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){        
-        //Si el jugador acierta la palabra, esta no se le muestra a los demás jugadores
-        mensaje = username.value + ', ha acertado la palabra'; 
-        //Cuando el jugador acierta la palabra, se le lleva esta información al servidor por medio de esta variable.
-        flag = true;       
+  var mensaje;    
+    if(palabraEscogida != undefined){
+      if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
+          mensaje = username.value + ', ha acertado la palabra';             
+          var data = {
+            username:username.value,
+            message: mensaje,
+            id: socket.id,        
+        }
+        socket.emit('acierto',data);
+      }else{
+        mensaje = message.value;  
+        var data = {
+          username:username.value,
+          message: mensaje,
+          id: socket.id,        
+        }
+        socket.emit('chat message' ,data);    
+      } 
     }else{
-      mensaje = message.value;      
-    } 
-  }else{
-    mensaje = message.value;
-  }  
-  var data = {
-      username:username.value,
-      message: mensaje,
-      id: socket.id,
-      isAcierto: flag
-  }
-  socket.emit('chat message' ,data);    
+      mensaje = message.value;
+      var data = {
+        username:username.value,
+        message: mensaje,
+        id: socket.id,        
+      }
+      socket.emit('chat message' ,data);  
+    }      
 });
 
 socket.on('chat message', function(data){  
