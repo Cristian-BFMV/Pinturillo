@@ -9,6 +9,9 @@ var players = [];
 var palabras = ["Balon" , "Carro" , "Puerta"];
 var puntos = 100;
 var porcentaje = 1;
+var counter = 80;
+var ultimoJugador;
+var ultimaPalabra;
 
 
 app.use(express.static(path.join(__dirname,'public')));
@@ -19,14 +22,9 @@ http.listen(3000, ()=>{
 /** Evento de conexion de usuario al servidor **/
 io.on('connection', (socket)=>{
     var flag = false;
-
-    var sala = ''; //Variable para identificar sala donde se encuentra un socket
-    //Unimos el socket a la sala por defecto
-    socket.join(sala);
-
     console.log('An user connected ' + socket.id);
     socket.on('mouse', (data)=>{
-        socket.broadcast.in(sala).emit('mouse', data);
+        socket.broadcast.emit('mouse', data);
     });
 
     /** Evento de recibir mensjaes que son enviados del chat **/
@@ -38,7 +36,7 @@ io.on('connection', (socket)=>{
          *  un hipotetico host.
          *  **/
         
-         /* Almacena la informacion de un cliente cuando este envia un mensaje por primera vez*/ 
+         /* Alamacena la informacion de un cliente cuando este envia un mensaje por primera vez*/ 
         if(!flag){
             var playerData = {
                 username: data.username,
@@ -49,14 +47,12 @@ io.on('connection', (socket)=>{
             players.push(playerData);
             flag = true;            
         }
-        //En caso de que el jugador haya acertado , se le aumenta el puntaje                
-        io.sockets.in(sala).emit('chat message',data);
+                  
+        io.sockets.emit('chat message',data);
     });
     /* Evento para limpliar el tablero, usarlo cuando sea necesario implementar la funcionalidad*/
-    socket.on('clear board', (data)=>{
-        console.log(data);
-        var respuesta = 'board cleared';
-        socket.broadcast.in(sala).emit('clear board', respuesta);
+    socket.on('clear board', ()=>{                
+        io.sockets.emit('clear board');
     });
 
     socket.on('acierto' , (data)=>{
@@ -64,35 +60,54 @@ io.on('connection', (socket)=>{
             if(players[i].id == data.id && players[i].username == data.username){
                 players[i].puntaje += puntos*porcentaje;
                 if(porcentaje > 0){
-                    porcentaje -= 0.25;
+                    porcentaje -= 0.15;
+                }else {
+                    porcentaje = 1;
+                    socket.emit('restart the game');
+                    counter = 80;
                 }
                 console.log(players[i]);
                 break;
             }
         }
-        io.sockets.in(sala).emit('chat message',data);
+        io.sockets.emit('chat message',data);
     });
     /* Evento que escoge uno de los jugadores guardados en el array players para que sea él el unico que tenga el permiso de dibujar*/
     socket.on('start the game',  ()=>{
         var jugadorEscogido = Math.floor(Math.random()*players.length);
         var palabraEscogida = Math.floor(Math.random()*palabras.length);
+        if(ultimoJugador != undefined && players[jugadorEscogido] == ultimoJugador){
+            jugadorEscogido = (jugadorEscogido+1)%players.length;
+        }
+        if(ultimaPalabra != undefined && palabras[palabraEscogida] == ultimaPalabra){
+            palabraEscogida = (palabraEscogida+1)%palabras.length;
+        }
+        ultimaPalabra = palabras[palabraEscogida];
+        ultimoJugador = players[jugadorEscogido];
         var gameState ={
             jugador: players[jugadorEscogido],
             palabra: palabras[palabraEscogida]
-        };     
+        };             
         console.log(gameState);
-        io.sockets.in(sala).emit('start the game', gameState);
+        io.sockets.emit('start the game', gameState);
     });    
 
-    /** Evento de cambio de canal **/
-    socket.on('change channel', (nuevaSala)=> {
-        socket.join(nuevaSala); //Se une el socket al nuevo canal
-        socket.leave(sala); //Se saca el socket de su anterior canal
-        console.log('El usuario ',socket.id,' se ha cambiado del canal ',sala,' a ',nuevaSala );
-        sala = nuevaSala; //Se indica el canal en el que se encuentra el socket
-        socket.emit('change channel',nuevaSala); //Se envia el evento de cambio de canal
+    socket.on('timer' , ()=>{        
+        setInterval(timeIt, 1000);
     });
 
+    function timeIt(){
+        io.sockets.emit('timer', counter);        
+        counter--;
+        if(counter == 0){
+            socket.emit('restart the game');
+            counter = 80;
+        }
+    }
+
+    socket.on('no entiendo' , (data)=>{
+        console.log(data, 'la puata madre');
+    });
 });
 
 

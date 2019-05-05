@@ -4,6 +4,7 @@ var jugadorDibujo;
 var palabraEscogida;
 var myCanvas;
 var acierto = false;
+var timer;
 /** Elementos del DOM **/
 let message = document.getElementById('message');
 let username = document.getElementById('username');
@@ -15,9 +16,9 @@ let jugar = document.getElementById('jugar');
 
 function setup() {
   myCanvas = createCanvas(980,400);    
-  background(255);      
+  //background(255);      
   myCanvas.parent('chat-container');
-  
+  timer = select('#timer');     
 }
 
 function newDrawing(data){
@@ -80,7 +81,7 @@ function keyPressed(){
  *  informacion sera el usuario que envia el mensaje y el contenido de este. En 
  *  este caso lo enviamos como un objeto donde obtenemos el valor que tengan las
  *  etiquetas "input" (username y message) de nuestro HTML**/
-btn.addEventListener('click', function(){    
+btn.addEventListener('click', ()=>{    
   var mensaje;    
     if(palabraEscogida != undefined){
       if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
@@ -111,20 +112,6 @@ btn.addEventListener('click', function(){
     }      
 });
 
-sala1.addEventListener('click',function(){
-  socket.emit('change channel','sala1');
-  clear();
-  setup();
-});
-  
-
-
-sala2.addEventListener('click',function(){
-  socket.emit('change channel', 'sala2');
-  clear();
-  setup();
-});
-
 socket.on('chat message', function(data){  
   actions.innerHTML = '';
   output.innerHTML += `<p>
@@ -132,37 +119,42 @@ socket.on('chat message', function(data){
   </p>`
 });
 
-socket.on('change channel', function(sala){  
-  actions.innerHTML = '';
-  output.innerHTML += `<p>
-      Bienvenido a la sala: <strong>${sala}</strong>
-  </p>`
- // clear();
-  //setup();
-});
 //Evento que dibuja en el browser de los demás jugadores, se llama a la función newDrawing
 socket.on('mouse', newDrawing);  
 
-/*  clear();
-  setup();
-  var data ='clear the board';
-  socket.emit('clear board', data);*/
-
 //Por el momento la funcionalidad de escoger el jugador para que se le premita dibujar a traves del evento del boton
 jugar.addEventListener('click' , ()=>{
-    socket.emit('start the game');
+    socket.emit('start the game');  
+    socket.emit('timer');     
+});
+
+socket.on('timer', (counter)=>{
+  timer.html(counter);  
+});
+
+socket.on('restart the game' , ()=>{
+  socket.emit('clear board');
+  socket.emit('start the game'); 
 });
 //Evento que recibe el jugador que tiene el permiso de dibujar por parte del servidor
 socket.on('start the game' , (gameState)=>{
-  jugadorDibujo = gameState.jugador;
-  palabraEscogida = gameState.palabra;  
+  jugadorDibujo = gameState.jugador;  
+  palabraEscogida = gameState.palabra;
+  var mensaje;
+  if(jugadorDibujo.id == socket.id){
+    mensaje = 'Seras el siguinte dibujante, y tu palabra es: ' + gameState.palabra;
+  }else{
+    mensaje = gameState.jugador.username + ', sera el siguiente en dibujar';
+  }  
+  actions.innerHTML = '';
+  output.innerHTML += `<p>
+      <strong>${mensaje}</strong>
+  </p>`  
 });
 
 //Evento(no implementado) que sirve para limpiar el tablero.
-socket.on('clear board', (data)=>{
-  console.log(data)
+socket.on('clear board', ()=>{
   clear();
-  setup();
 });
 
 

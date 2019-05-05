@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Gugi');
+
 * { 
     margin: 0;
      padding: 0; 
@@ -5,7 +7,7 @@
 }
 body { 
     font: 13px Helvetica, Arial;
-    background-color: #646572;
+    background-color: #ffffff;
     
  }
 
@@ -85,6 +87,16 @@ button {
     padding: 12px 0;
     width: 100%;
     border-radius: 0 0 2px 2px;
+}
+
+#chat-window #timer{
+    font-size: 25px;
+    color: black;
+    font-weight: bold;
+    font-style: italic;
+    font-family: "Gugi","Times New Roman", Times, serif;
+    padding-left: 10px;
+    padding-top: 10px;
 }
 
 
