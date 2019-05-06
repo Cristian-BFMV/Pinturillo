@@ -18,7 +18,7 @@ let login = document.getElementById('login');
 /** Logica tablero*/
 function setup() {
   myCanvas = createCanvas(980,400);    
-  //background(255);      
+  background(255);      
   myCanvas.parent('chat-container');
   timer = select('#timer');     
 }
@@ -54,16 +54,24 @@ function keyPressed(){
     var mensaje;    
     if(palabraEscogida != undefined){
       if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
-          mensaje = username.value + ', ha acertado la palabra';             
-          var data = {
-            username:username.value,
-            message: mensaje,
-            id: socket.id,        
+          if(jugadorDibujo.username != username.value && jugadorDibujo.id != socket.id){
+            mensaje = username.value + ', ha acertado la palabra';             
+            var data = {
+              username:username.value,
+              message: mensaje,
+              id: socket.id,        
+          }
+          socket.emit('acierto',data);          
+          message.disabled = true;
         }
-        socket.emit('acierto',data);
-        
       }else{
-        mensaje = message.value;      
+        mensaje = message.value;  
+        var data = {
+          username:username.value,
+          message: mensaje,
+          id: socket.id,        
+        }
+        socket.emit('chat message' ,data);     
       } 
     }else{
       mensaje = message.value;
@@ -72,11 +80,11 @@ function keyPressed(){
         message: mensaje,
         id: socket.id,        
       }
-      socket.emit('chat message' ,data);  
-      
+      socket.emit('chat message' ,data);          
     }
-       
-  }
+    username.disabled = true;
+    message.value = "";        
+  } 
 }
 
 /** Evento de click del boton "Send"
@@ -88,41 +96,45 @@ function keyPressed(){
  *  este caso lo enviamos como un objeto donde obtenemos el valor que tengan las
  *  etiquetas "input" (username y message) de nuestro HTML**/
 btn.addEventListener('click', ()=>{    
-  var mensaje;   
+  var mensaje; 
   
-  if(validarCampo(username) && validarCampo(message)){
-    if(palabraEscogida != undefined){
-      if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
-          mensaje = username.value + ', ha acertado la palabra';             
+    if(validarCampo(username) && validarCampo(message)){
+      if(palabraEscogida != undefined){
+        if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
+          if(jugadorDibujo.username != username.value && jugadorDibujo.id != socket.id){
+            mensaje = username.value + ', ha acertado la palabra';             
+            var data = {
+              username:username.value,
+              message: mensaje,
+              id: socket.id,        
+          }
+          socket.emit('acierto',data);
+          message.disabled = true;          
+        }
+        
+      }else{
+          mensaje = message.value;  
           var data = {
             username:username.value,
             message: mensaje,
             id: socket.id,        
-        }
-        socket.emit('acierto',data);
-        
+          }
+          socket.emit('chat message' ,data);    
+          
+        } 
       }else{
-        mensaje = message.value;  
+        mensaje = message.value;
         var data = {
           username:username.value,
           message: mensaje,
           id: socket.id,        
         }
-        socket.emit('chat message' ,data);    
+        socket.emit('chat message' ,data);  
         
-      } 
-    }else{
-      mensaje = message.value;
-      var data = {
-        username:username.value,
-        message: mensaje,
-        id: socket.id,        
       }
-      socket.emit('chat message' ,data);  
-      
     }
-  }
-  message.value = "";        
+    username.disabled = true;
+    message.value = "";  
 });
 
 socket.on('chat message', function(data){  
@@ -139,7 +151,8 @@ socket.on('mouse', newDrawing);
 jugar.addEventListener('click' , ()=>{
     socket.emit('start the game');  
     socket.emit('timer');
-    username.disable = true;   
+    socket.emit('desactivar boton');
+    jugar.disabled = true;
 });
 
 socket.on('timer', (counter)=>{
@@ -147,8 +160,10 @@ socket.on('timer', (counter)=>{
 });
 
 socket.on('restart the game' , ()=>{
+  socket.emit('lista');
   socket.emit('clear board');
-  socket.emit('start the game'); 
+  socket.emit('start the game');
+  message.disabled = false;
 });
 
 
@@ -172,17 +187,26 @@ socket.on('start the game' , (gameState)=>{
 socket.on('lista', function(lista){
 
     for(var i = 0; i < lista.length; i++){
+      var mensaje = lista[i].username+", Puntaje: "+lista[i].puntaje;
       actions.innerHTML = '';
       output.innerHTML += `<p>
-          <strong>${lista[i]}</strong>
+          <strong>${mensaje}</strong>
       </p>`
     }
 
 });
 
+socket.on('desactivar boton', function(){
+
+  jugar.disabled = true;
+
+});
+
+
 //Evento(no implementado) que sirve para limpiar el tablero.
 socket.on('clear board', ()=>{
   clear();
+  myCanvas.style('background-color' , 'white');  
 });
 
 //Validacion de campo lleno o vacio con emision de mensaje

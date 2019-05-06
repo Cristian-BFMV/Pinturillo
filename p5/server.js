@@ -9,7 +9,7 @@ var players = [];
 var palabras = ["Balon" , "Carro" , "Puerta"];
 var puntos = 100;
 var porcentaje = 1;
-var counter = 80;
+var counter = 60;
 var ultimoJugador;
 var ultimaPalabra;
 
@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname,'public')));
 http.listen(3000, ()=>{
     console.log('Listening on port 3000');
 });
-/** Evento de conexion de usuario al servidor **/
+/* Evento de conexion de usuario al servidor */
 io.on('connection', (socket)=>{
     var flag = false;
     console.log('An user connected ' + socket.id);
@@ -27,27 +27,27 @@ io.on('connection', (socket)=>{
         socket.broadcast.emit('mouse', data);
     });
 
-    /** Evento de recibir mensjaes que son enviados del chat **/
+    /* Evento de recibir mensjaes que son enviados del chat */
     socket.on('chat message',  function (data){
 
         /** Evento para enviar los mensajes del chat a lo otros usuarios
          *  
          *  El socket.emit permite que ese evento enviado tambien sea visible 
          *  un hipotetico host.
-         *  **/
+           */
         
          /* Alamacena la informacion de un cliente cuando este envia un mensaje por primera vez*/ 
         if(!flag){
             var playerData = {
                 username: data.username,
                 id: data.id,    
-                puntaje: 0            
+                puntaje: 0,
+                haAcertado: false            
             }
             console.log(playerData);
             players.push(playerData);
             flag = true;            
-        }
-                  
+        }                  
         io.sockets.emit('chat message',data);
     });
     /* Evento para limpliar el tablero, usarlo cuando sea necesario implementar la funcionalidad*/
@@ -57,14 +57,14 @@ io.on('connection', (socket)=>{
 
     socket.on('acierto' , (data)=>{
         for(var i = 0 ; i < players.length ; i++){
-            if(players[i].id == data.id && players[i].username == data.username){
+            if(players[i].id == data.id && players[i].username == data.username && players[i].haAcertado == false){
                 players[i].puntaje += puntos*porcentaje;
+                players[i].haAcertado = true;
                 if(porcentaje > 0){
                     porcentaje -= 0.15;
-                }else {
-                    porcentaje = 1;
+                }else {                    
                     socket.emit('restart the game');
-                    counter = 80;
+                    counter = 60;
                 }
                 console.log(players[i]);
                 break;
@@ -88,7 +88,12 @@ io.on('connection', (socket)=>{
             jugador: players[jugadorEscogido],
             palabra: palabras[palabraEscogida]
         };             
-        console.log(gameState);
+        for(var i = 0 ; i < players.length ; i++){
+            if(players[i].haAcertado == true){
+                players[i].haAcertado = false;
+            }
+        }
+        porcentaje = 1;
         io.sockets.emit('start the game', gameState);
     });    
 
@@ -101,20 +106,21 @@ io.on('connection', (socket)=>{
         counter--;
         if(counter == 0){
             socket.emit('restart the game');
-            counter = 80;
+            counter = 60;
         }
     }
-
-    socket.on('no entiendo' , (data)=>{
-        console.log(data, 'la puata madre');
-    });
-
-    socket.on('lista', function(lista){
-        
+    
+    socket.on('lista', function(){
+        var nuevaLista = [];
         for (var i = 0; i < players.length; i++){
             nuevaLista.push(players[i]);
-        }
-        
+        }        
         io.sockets.emit('lista',nuevaLista);
     });
+
+    socket.on('desactivar boton', function(){
+
+        socket.broadcast.emit('desactivar boton');
+    }
+    );
 });

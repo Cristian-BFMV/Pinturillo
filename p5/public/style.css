@@ -8,7 +8,9 @@
 body { 
     font: 13px Helvetica, Arial;
     background-color: #ffffff;
-    
+    font-family: 'Nunito', sans-serif;
+    background-image: url(blue_waves.jpg); 
+	background-repeat:no-repeat;
  }
 
 #messages {
@@ -23,9 +25,6 @@ body {
     background: rgb(10, 10, 10); 
 }
 
-body {
-    font-family: 'Nunito', sans-serif;
-}
 
 #chat-container {
     max-width: 1000px;
@@ -79,6 +78,10 @@ input {
     width: 100%; 
 }
 
+input:disabled{
+    background:#dddddd;
+}
+
 button {
     background: #646572;
     color: #fff;
@@ -87,6 +90,10 @@ button {
     padding: 12px 0;
     width: 100%;
     border-radius: 0 0 2px 2px;
+}
+
+button:disabled{
+    background:#dddddd;
 }
 
 #chat-window #timer{
