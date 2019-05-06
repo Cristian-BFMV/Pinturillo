@@ -5,15 +5,17 @@ var palabraEscogida;
 var myCanvas;
 var acierto = false;
 var timer;
+
 /** Elementos del DOM **/
 let message = document.getElementById('message');
-let username = document.getElementById('username');
 let btn = document.getElementById('send');
 let output = document.getElementById('output');
 let actions = document.getElementById('actions');
 let jugar = document.getElementById('jugar');
+let username = document.getElementById('username');
+let login = document.getElementById('login');
 
-
+/** Logica tablero*/
 function setup() {
   myCanvas = createCanvas(980,400);    
   //background(255);      
@@ -45,6 +47,7 @@ function mouseDragged(){
     }
   }
 }
+
 //Permite que el usuario envie el mensaje al oprimir la tecla enter
 function keyPressed(){
   if(keyCode === ENTER){
@@ -58,6 +61,7 @@ function keyPressed(){
             id: socket.id,        
         }
         socket.emit('acierto',data);
+        
       }else{
         mensaje = message.value;      
       } 
@@ -69,7 +73,9 @@ function keyPressed(){
         id: socket.id,        
       }
       socket.emit('chat message' ,data);  
-    }    
+      
+    }
+       
   }
 }
 
@@ -82,7 +88,9 @@ function keyPressed(){
  *  este caso lo enviamos como un objeto donde obtenemos el valor que tengan las
  *  etiquetas "input" (username y message) de nuestro HTML**/
 btn.addEventListener('click', ()=>{    
-  var mensaje;    
+  var mensaje;   
+  
+  if(validarCampo(username) && validarCampo(message)){
     if(palabraEscogida != undefined){
       if(message.value.toLowerCase() == palabraEscogida.toLowerCase()){
           mensaje = username.value + ', ha acertado la palabra';             
@@ -92,6 +100,7 @@ btn.addEventListener('click', ()=>{
             id: socket.id,        
         }
         socket.emit('acierto',data);
+        
       }else{
         mensaje = message.value;  
         var data = {
@@ -100,6 +109,7 @@ btn.addEventListener('click', ()=>{
           id: socket.id,        
         }
         socket.emit('chat message' ,data);    
+        
       } 
     }else{
       mensaje = message.value;
@@ -109,7 +119,10 @@ btn.addEventListener('click', ()=>{
         id: socket.id,        
       }
       socket.emit('chat message' ,data);  
-    }      
+      
+    }
+  }
+  message.value = "";        
 });
 
 socket.on('chat message', function(data){  
@@ -125,7 +138,8 @@ socket.on('mouse', newDrawing);
 //Por el momento la funcionalidad de escoger el jugador para que se le premita dibujar a traves del evento del boton
 jugar.addEventListener('click' , ()=>{
     socket.emit('start the game');  
-    socket.emit('timer');     
+    socket.emit('timer');
+    username.disable = true;   
 });
 
 socket.on('timer', (counter)=>{
@@ -136,13 +150,15 @@ socket.on('restart the game' , ()=>{
   socket.emit('clear board');
   socket.emit('start the game'); 
 });
+
+
 //Evento que recibe el jugador que tiene el permiso de dibujar por parte del servidor
 socket.on('start the game' , (gameState)=>{
   jugadorDibujo = gameState.jugador;  
   palabraEscogida = gameState.palabra;
   var mensaje;
   if(jugadorDibujo.id == socket.id){
-    mensaje = 'Seras el siguinte dibujante, y tu palabra es: ' + gameState.palabra;
+    mensaje = 'Seras el siguiente dibujante, y tu palabra es: ' + gameState.palabra;
   }else{
     mensaje = gameState.jugador.username + ', sera el siguiente en dibujar';
   }  
@@ -152,9 +168,42 @@ socket.on('start the game' , (gameState)=>{
   </p>`  
 });
 
+// Evento que recibe la lista de jugadores y la imprime en el chat
+socket.on('lista', function(lista){
+
+    for(var i = 0; i < lista.length; i++){
+      actions.innerHTML = '';
+      output.innerHTML += `<p>
+          <strong>${lista[i]}</strong>
+      </p>`
+    }
+
+});
+
 //Evento(no implementado) que sirve para limpiar el tablero.
 socket.on('clear board', ()=>{
   clear();
 });
+
+//Validacion de campo lleno o vacio con emision de mensaje
+function validarCampo(campo){
+  if(campo.value.trim() != undefined){
+    if(campo.value.trim() === ""){
+      return esVacio(campo, "No puede dejar campos vacios");
+    }
+    return true;
+  } 
+}
+
+//Funcion que emite mensaje de alerta
+function esVacio(campo, mensaje){
+      alert(mensaje);
+      focus(campo);
+      return false;
+}
+
+
+
+
 
 

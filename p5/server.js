@@ -108,8 +108,13 @@ io.on('connection', (socket)=>{
     socket.on('no entiendo' , (data)=>{
         console.log(data, 'la puata madre');
     });
+
+    socket.on('lista', function(lista){
+        
+        for (var i = 0; i < players.length; i++){
+            nuevaLista.push(players[i]);
+        }
+        
+        io.sockets.emit('lista',nuevaLista);
+    });
 });
-
-
-
-
