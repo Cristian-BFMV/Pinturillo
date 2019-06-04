@@ -1,3 +1,3 @@
 # Pinturillo
 
-Hi, this is a project for the college  :D
+Hi, this is a project for college  :D
