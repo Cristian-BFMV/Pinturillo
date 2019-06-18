@@ -39,16 +39,7 @@ io.on('connection', (socket)=>{
          *  **/
         
          /* Almacena la informacion de un cliente cuando este envia un mensaje por primera vez*/ 
-        if(!flag){
-            var playerData = {
-                username: data.username,
-                id: data.id,    
-                puntaje: 0            
-            }
-            console.log(playerData);
-            players.push(playerData);
-            flag = true;            
-        }
+        
         //En caso de que el jugador haya acertado , se le aumenta el puntaje                
         io.sockets.in(sala).emit('chat message',data);
     });
