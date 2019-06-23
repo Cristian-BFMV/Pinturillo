@@ -44,11 +44,7 @@ io.on('connection', (socket)=>{
         io.sockets.in(sala).emit('chat message',data);
     });
     /* Evento para limpliar el tablero, usarlo cuando sea necesario implementar la funcionalidad*/
-    socket.on('clear board', (data)=>{
-        console.log(data);
-        var respuesta = 'board cleared';
-        socket.broadcast.in(sala).emit('clear board', respuesta);
-    });
+  
 
     socket.on('acierto' , (data)=>{
         for(var i = 0 ; i < players.length ; i++){
